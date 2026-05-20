@@ -1,0 +1,125 @@
+from __future__ import annotations
+
+from typing import Any, Optional, Union
+
+from pydantic import BaseModel, Field
+
+
+class OwnerRef(BaseModel):
+    id: Optional[str] = None
+    email: Optional[str] = None
+
+
+class TagRef(BaseModel):
+    id: Optional[str] = None
+    name: Optional[str] = None
+
+
+class StatusRef(BaseModel):
+    id: Optional[str] = None
+    name: Optional[str] = None
+
+
+class Timeframe(BaseModel):
+    startDate: Optional[str] = None
+    endDate: Optional[str] = None
+
+
+class EntityFields(BaseModel):
+    model_config = {"extra": "allow"}
+
+    name: Optional[str] = None
+    owner: Optional[OwnerRef] = None
+    tags: list[TagRef] = Field(default_factory=list)
+    status: Optional[StatusRef] = None
+    timeframe: Optional[Timeframe] = None
+    archived: Optional[bool] = None
+
+
+class RelationshipTarget(BaseModel):
+    id: Optional[str] = None
+    type: Optional[str] = None
+
+
+class Relationship(BaseModel):
+    type: Optional[str] = None
+    target: Optional[RelationshipTarget] = None
+
+
+class Links(BaseModel):
+    self_: Optional[str] = Field(None, alias="self")
+    html: Optional[str] = None
+
+
+class Entity(BaseModel):
+    id: str
+    type: str
+    fields: EntityFields = Field(default_factory=EntityFields)
+    relationships: Optional[list[Relationship]] = None
+    links: Optional[Links] = None
+    createdAt: Optional[str] = None
+    updatedAt: Optional[str] = None
+
+
+class NoteContentMessage(BaseModel):
+    externalId: Optional[str] = None
+    content: Optional[str] = None
+    authorName: Optional[str] = None
+    authorType: Optional[str] = None
+    timestamp: Optional[str] = None
+
+
+class NoteFields(BaseModel):
+    name: Optional[str] = None
+    content: Optional[Union[str, list[NoteContentMessage]]] = None
+    tags: list[TagRef] = Field(default_factory=list)
+    owner: Optional[OwnerRef] = None
+    creator: Optional[OwnerRef] = None
+    processed: Optional[bool] = None
+    archived: Optional[bool] = None
+
+
+class Note(BaseModel):
+    id: str
+    type: str
+    fields: NoteFields = Field(default_factory=NoteFields)
+    relationships: Optional[list[Relationship]] = None
+    createdAt: Optional[str] = None
+    updatedAt: Optional[str] = None
+
+
+class Member(BaseModel):
+    id: str
+    name: Optional[str] = None
+    email: Optional[str] = None
+    role: Optional[str] = None
+    disabled: Optional[bool] = None
+
+
+class Team(BaseModel):
+    id: str
+    name: Optional[str] = None
+    handle: Optional[str] = None
+    description: Optional[str] = None
+    createdAt: Optional[str] = None
+    updatedAt: Optional[str] = None
+
+
+class EntityFieldConfig(BaseModel):
+    id: str
+    name: Optional[str] = None
+    type: Optional[str] = None
+
+
+class EntityConfiguration(BaseModel):
+    type: Optional[str] = None
+    fields: list[EntityFieldConfig] = Field(default_factory=list)
+
+
+class PaginatedLinks(BaseModel):
+    next: Optional[str] = None
+
+
+class PaginatedResponse(BaseModel):
+    data: list[Any] = Field(default_factory=list)
+    links: Optional[PaginatedLinks] = None

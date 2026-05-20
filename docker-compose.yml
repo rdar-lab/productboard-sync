@@ -1,0 +1,20 @@
+services:
+  sync:
+    build: .
+    container_name: productboard-sync
+    env_file: .env
+    volumes:
+      - ${LOCAL_OUTPUT_DIR:-./output}:/output
+    environment:
+      LOCAL_OUTPUT_DIR: /output
+    command: ["--entity", "all"]
+    restart: "no"
+
+  scheduler:
+    image: mcuadros/ofelia:v0.3.22
+    depends_on:
+      - sync
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./ofelia.ini:/etc/ofelia/config.ini:ro
+    restart: unless-stopped
