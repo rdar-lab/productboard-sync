@@ -30,7 +30,7 @@ class EntityFields(BaseModel):
 
     name: Optional[str] = None
     owner: Optional[OwnerRef] = None
-    tags: list[TagRef] = Field(default_factory=list)
+    tags: Optional[list[TagRef]] = Field(default_factory=list)
     status: Optional[StatusRef] = None
     timeframe: Optional[Timeframe] = None
     archived: Optional[bool] = None
@@ -79,7 +79,7 @@ class NoteContentMessage(BaseModel):
 class NoteFields(BaseModel):
     name: Optional[str] = None
     content: Optional[Union[str, list[NoteContentMessage]]] = None
-    tags: list[TagRef] = Field(default_factory=list)
+    tags: Optional[list[TagRef]] = Field(default_factory=list)
     owner: Optional[OwnerRef] = None
     creator: Optional[OwnerRef] = None
     processed: Optional[bool] = None

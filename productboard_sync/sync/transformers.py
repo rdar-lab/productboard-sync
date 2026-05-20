@@ -9,7 +9,9 @@ from typing import Any
 from productboard_sync.productboard.models import Entity, Member, Note, NoteContentMessage, Team
 
 
-def _join_tags(tags: list) -> str:
+def _join_tags(tags) -> str:
+    if not tags:
+        return ""
     return " | ".join(tag.name for tag in tags if getattr(tag, "name", None))
 
 
