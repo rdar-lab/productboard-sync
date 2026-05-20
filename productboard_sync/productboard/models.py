@@ -120,14 +120,22 @@ class Team(BaseModel):
 
 
 class EntityFieldConfig(BaseModel):
+    model_config = {"extra": "ignore"}
+
     id: str
     name: Optional[str] = None
-    type: Optional[str] = None
 
 
 class EntityConfiguration(BaseModel):
     type: Optional[str] = None
     fields: list[EntityFieldConfig] = Field(default_factory=list)
+
+    @field_validator("fields", mode="before")
+    @classmethod
+    def normalize_fields(cls, v):
+        if isinstance(v, dict):
+            return list(v.values())
+        return v
 
 
 class PaginatedLinks(BaseModel):

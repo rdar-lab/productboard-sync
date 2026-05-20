@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import logging
 
+import requests
+
 from productboard_sync.productboard.client import ProductboardClient
 from productboard_sync.productboard.models import EntityFieldConfig
 
@@ -22,8 +24,14 @@ class FieldDiscovery:
         try:
             config = self._client.get_entity_configuration(entity_type)
             all_fields: list[EntityFieldConfig] = config.fields
-        except Exception:
-            logger.warning("Could not fetch configuration for %s, using standard fields only", entity_type)
+        except requests.exceptions.HTTPError as exc:
+            if exc.response is not None and exc.response.status_code == 404:
+                logger.debug("No custom field configuration for %s", entity_type)
+            else:
+                logger.warning("Could not fetch configuration for %s: %s", entity_type, exc)
+            all_fields = []
+        except Exception as exc:
+            logger.warning("Could not fetch configuration for %s: %s", entity_type, exc)
             all_fields = []
 
         standard = [(field_id, field_id) for field_id in STANDARD_FIELD_IDS]

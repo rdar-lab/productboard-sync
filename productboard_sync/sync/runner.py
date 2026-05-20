@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import logging
 
+import requests
+
 from productboard_sync.config import ALL_ENTITY_TYPES
 from productboard_sync.productboard.client import ProductboardClient
 from productboard_sync.storage.base import StorageBackend
@@ -38,6 +40,12 @@ class SyncRunner:
         for entity_type in entity_types:
             try:
                 self._sync_one(entity_type, dry_run)
+            except requests.exceptions.HTTPError as exc:
+                if exc.response is not None and exc.response.status_code == 400:
+                    logger.warning("Entity type %s is not supported in this workspace — skipping", entity_type)
+                else:
+                    logger.error("Failed to sync %s", entity_type, exc_info=True)
+                    failed.append(entity_type)
             except Exception:
                 logger.error("Failed to sync %s", entity_type, exc_info=True)
                 failed.append(entity_type)

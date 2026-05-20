@@ -1,4 +1,5 @@
 import pytest
+import requests
 from unittest.mock import MagicMock
 from productboard_sync.sync.runner import SyncRunner
 from productboard_sync.productboard.models import Entity, Note, Member, Team
@@ -60,3 +61,21 @@ def test_unknown_entity_type_skipped_gracefully():
     runner, client, backend = make_runner()
     runner.run(["unknown_type"])
     backend.write_file.assert_not_called()
+
+
+def test_http_400_skipped_as_unsupported():
+    runner, client, backend = make_runner()
+    resp = MagicMock()
+    resp.status_code = 400
+    client.search_entities.side_effect = requests.exceptions.HTTPError(response=resp)
+    runner.run(["feature"])  # should not raise
+    backend.write_file.assert_not_called()
+
+
+def test_http_500_counted_as_failure():
+    runner, client, backend = make_runner()
+    resp = MagicMock()
+    resp.status_code = 500
+    client.search_entities.side_effect = requests.exceptions.HTTPError(response=resp)
+    with pytest.raises(RuntimeError, match="Sync failed for entity type"):
+        runner.run(["feature"])
