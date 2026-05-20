@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class OwnerRef(BaseModel):
@@ -60,6 +60,13 @@ class Entity(BaseModel):
     createdAt: Optional[str] = None
     updatedAt: Optional[str] = None
 
+    @field_validator("relationships", mode="before")
+    @classmethod
+    def unwrap_relationships(cls, v):
+        if isinstance(v, dict):
+            return v.get("data")
+        return v
+
 
 class NoteContentMessage(BaseModel):
     externalId: Optional[str] = None
@@ -86,6 +93,13 @@ class Note(BaseModel):
     relationships: Optional[list[Relationship]] = None
     createdAt: Optional[str] = None
     updatedAt: Optional[str] = None
+
+    @field_validator("relationships", mode="before")
+    @classmethod
+    def unwrap_relationships(cls, v):
+        if isinstance(v, dict):
+            return v.get("data")
+        return v
 
 
 class Member(BaseModel):

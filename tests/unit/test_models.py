@@ -45,3 +45,25 @@ def test_paginated_response_parses():
 def test_paginated_response_null_next():
     resp = PaginatedResponse.model_validate({"data": [], "links": {"next": None}})
     assert resp.links.next is None
+
+
+def test_entity_relationships_unwrapped_from_envelope():
+    payload = {
+        "id": "x",
+        "type": "feature",
+        "relationships": {"data": [{"type": "link", "target": {"id": "y", "type": "feature"}}], "links": {"next": None}},
+    }
+    entity = Entity.model_validate(payload)
+    assert len(entity.relationships) == 1
+    assert entity.relationships[0].target.id == "y"
+
+
+def test_note_relationships_unwrapped_from_envelope():
+    payload = {
+        "id": "n1",
+        "type": "note",
+        "relationships": {"data": [{"type": "link", "target": {"id": "f1", "type": "feature"}}], "links": {"next": None}},
+    }
+    note = Note.model_validate(payload)
+    assert len(note.relationships) == 1
+    assert note.relationships[0].target.id == "f1"
