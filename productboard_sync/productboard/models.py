@@ -102,19 +102,35 @@ class Note(BaseModel):
         return v
 
 
-class Member(BaseModel):
-    id: str
+class MemberFields(BaseModel):
+    model_config = {"extra": "ignore"}
+
     name: Optional[str] = None
     email: Optional[str] = None
     role: Optional[str] = None
     disabled: Optional[bool] = None
 
 
-class Team(BaseModel):
+class Member(BaseModel):
     id: str
+    type: str = "member"
+    fields: MemberFields = Field(default_factory=MemberFields)
+    createdAt: Optional[str] = None
+    updatedAt: Optional[str] = None
+
+
+class TeamFields(BaseModel):
+    model_config = {"extra": "ignore"}
+
     name: Optional[str] = None
     handle: Optional[str] = None
     description: Optional[str] = None
+
+
+class Team(BaseModel):
+    id: str
+    type: str = "team"
+    fields: TeamFields = Field(default_factory=TeamFields)
     createdAt: Optional[str] = None
     updatedAt: Optional[str] = None
 

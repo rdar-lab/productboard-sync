@@ -139,13 +139,14 @@ def members_to_csv(members: Iterable[Member]) -> tuple[str, int]:
     writer.writeheader()
     count = 0
     for member in members:
+        f = member.fields
         writer.writerow(
             {
                 "id": member.id,
-                "name": member.name or "",
-                "email": member.email or "",
-                "role": member.role or "",
-                "disabled": str(member.disabled) if member.disabled is not None else "",
+                "name": f.name or "",
+                "email": f.email or "",
+                "role": f.role or "",
+                "disabled": str(f.disabled) if f.disabled is not None else "",
             }
         )
         count += 1
@@ -159,12 +160,13 @@ def teams_to_csv(teams: Iterable[Team]) -> tuple[str, int]:
     writer.writeheader()
     count = 0
     for team in teams:
+        f = team.fields
         writer.writerow(
             {
                 "id": team.id,
-                "name": team.name or "",
-                "handle": team.handle or "",
-                "description": team.description or "",
+                "name": f.name or "",
+                "handle": f.handle or "",
+                "description": f.description or "",
                 "createdAt": team.createdAt or "",
                 "updatedAt": team.updatedAt or "",
             }
