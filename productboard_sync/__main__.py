@@ -30,10 +30,20 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    from pathlib import Path
+
+    from pydantic import ValidationError
+
     from productboard_sync.config import ALL_ENTITY_TYPES, get_settings, get_storage_backend
     from productboard_sync.productboard.client import ProductboardClient
     from productboard_sync.sync.runner import SyncRunner
     from productboard_sync.utils.logging import setup_logging
+
+    if not Path(".env").exists():
+        logging.getLogger(__name__).error(
+            ".env file not found. Copy .env.example to .env and fill in your values."
+        )
+        sys.exit(1)
 
     try:
         settings = get_settings()
@@ -56,6 +66,9 @@ def main() -> None:
         runner = SyncRunner(client, backend)
         runner.run(entity_types, dry_run=args.dry_run)
         logger.info("Sync complete.")
+    except ValidationError as exc:
+        logging.getLogger(__name__).error("Configuration error: %s", exc)
+        sys.exit(1)
     except Exception:
         logging.getLogger(__name__).exception("Sync failed with an unhandled exception.")
         sys.exit(1)

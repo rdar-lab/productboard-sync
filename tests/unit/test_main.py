@@ -8,7 +8,9 @@ from productboard_sync.config import ALL_ENTITY_TYPES
 
 
 @pytest.fixture
-def local_env(tmp_path):
+def local_env(tmp_path, monkeypatch):
+    (tmp_path / ".env").touch()
+    monkeypatch.chdir(tmp_path)
     return {
         "PRODUCTBOARD_API_KEY": "test-key",
         "STORAGE_BACKEND": "local",
@@ -40,3 +42,12 @@ def test_explicit_entity_types_passed_to_runner(local_env):
          patch("productboard_sync.sync.runner.SyncRunner", return_value=mock_runner):
         main()
     mock_runner.run.assert_called_once_with(["feature", "notes"], dry_run=True)
+
+
+def test_missing_env_file_exits_1(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)  # directory with no .env file
+    with patch("sys.argv", ["prog", "--dry-run"]), \
+         patch.dict("os.environ", {}, clear=True):
+        with pytest.raises(SystemExit) as exc_info:
+            main()
+    assert exc_info.value.code == 1
